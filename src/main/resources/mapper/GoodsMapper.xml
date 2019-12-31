@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bpd.mapper.GoodsMapper">
+
+	<resultMap type="com.bpd.bean.Goods" id="rm">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="datea" property="datea" />
+		<result column="price" property="price" />
+		<result column="status" property="status" />
+		<association property="type" javaType="com.bpd.bean.Type">
+			<id column="tid" property="tid" />
+			<result column="tname" property="tname" />
+		</association>
+	</resultMap>
+	<select id="queryGoods" resultMap="rm" parameterType="map">
+		select *,t.tname from t_goods g join t_type t on g.tid=t.tid
+		<where>
+			<if test="name!=null and name!=''">
+				name like "%${name}%"
+			</if>
+			<if test="start!=null and start!=''  and end!=null and end !=''">
+				and datea between #{start} and #{end}
+			</if>
+		</where>
+	</select>
+	<!-- 添加 -->
+	<insert id="addGoods" parameterType="com.bpd.bean.Goods">
+		insert t_goods(name,datea,price,status,tid)
+		values(#{name},#{datea},#{price},#{status},#{type.tid})
+	</insert>
+	<!-- 修改 -->
+	<update id="updGoods" parameterType="com.bpd.bean.Goods">
+		update t_goods set
+		name=#{name},datea=#{datea},price=#{price},status=#{status},tid=#{type.tid}
+		where id=#{id}
+	</update>
+	<!-- 查询一个 -->
+	<select id="selectOne" resultMap="rm" parameterType="int">
+		select *,t.tname from t_goods g join t_type t on g.tid=t.tid where
+		id=#{id}
+		<!-- <where> <if test="id!=null and id!=''"> id=#{id} </if> </where> -->
+	</select>
+	<!-- 下拉 -->
+	<select id="TypeList" resultType="com.bpd.bean.Type">
+		SELECT tid,tname FROM t_type
+	</select>
+	<!-- 批量删除 -->
+	<delete id="delGoods" parameterType="map">
+		delete from t_goods
+		<where>
+			<if test="ids!=null and ids.length>0">
+				<foreach open="id in (" collection="ids" close=")"
+					separator="," item="aa">
+					#{aa}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	<!-- 删除 -->
+	<delete id="del" >
+	delete from t_goods where id=#{id}
+	</delete>
+</mapper>
